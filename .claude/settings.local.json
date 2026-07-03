@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell($paths = @\\(\"C:\\\\Program Files\\\\nodejs\\\\node.exe\", \"C:\\\\Program Files \\(x86\\)\\\\nodejs\\\\node.exe\", \"$env:APPDATA\\\\npm\\\\node.exe\", \"$env:LOCALAPPDATA\\\\nodejs\\\\node.exe\", \"$env:ProgramFiles\\\\nodejs\\\\npm.cmd\"\\); foreach\\($p in $paths\\){ if\\(Test-Path $p\\){ Write-Output \"FOUND: $p\" } }; Write-Output \"--- nvm ---\"; if\\(Test-Path \"$env:APPDATA\\\\nvm\"\\){ Get-ChildItem \"$env:APPDATA\\\\nvm\" -Directory | Select-Object Name }; Write-Output \"--- where via cmd ---\"; cmd /c \"where node 2>nul\"; cmd /c \"where npm 2>nul\")",
+      "PowerShell(winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements --silent)",
+      "PowerShell($machine = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\); $user = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); $env:Path = \"$machine;$user\"; npm install)",
+      "PowerShell($machine = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\); $user = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); $env:Path = \"$machine;$user\"; npm install next@14; Write-Output \"--- installed next version ---\"; npm ls next)",
+      "PowerShell($machine = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\); $user = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); $env:Path = \"$machine;$user\"; npm run dev)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000/\" -UseBasicParsing -TimeoutSec 60; Write-Output \"STATUS: $\\($r.StatusCode\\)\"; if\\($r.Content -match \"CỔNG PHÁP LUẬT QUỐC GIA\"\\){ Write-Output \"CONTENT OK: tìm thấy tiêu đề trang\" } else { Write-Output \"CONTENT: không thấy tiêu đề \\(xem đoạn đầu\\)\"; $r.Content.Substring\\(0,400\\) } } catch { Write-Output \"ERROR: $\\($_.Exception.Message\\)\" })"
+    ]
+  }
+}
