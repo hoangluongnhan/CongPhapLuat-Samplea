@@ -8,7 +8,15 @@
       "PowerShell($machine = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\); $user = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); $env:Path = \"$machine;$user\"; npm install)",
       "PowerShell($machine = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\); $user = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); $env:Path = \"$machine;$user\"; npm install next@14; Write-Output \"--- installed next version ---\"; npm ls next)",
       "PowerShell($machine = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\); $user = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); $env:Path = \"$machine;$user\"; npm run dev)",
-      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000/\" -UseBasicParsing -TimeoutSec 60; Write-Output \"STATUS: $\\($r.StatusCode\\)\"; if\\($r.Content -match \"CỔNG PHÁP LUẬT QUỐC GIA\"\\){ Write-Output \"CONTENT OK: tìm thấy tiêu đề trang\" } else { Write-Output \"CONTENT: không thấy tiêu đề \\(xem đoạn đầu\\)\"; $r.Content.Substring\\(0,400\\) } } catch { Write-Output \"ERROR: $\\($_.Exception.Message\\)\" })"
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000/\" -UseBasicParsing -TimeoutSec 60; Write-Output \"STATUS: $\\($r.StatusCode\\)\"; if\\($r.Content -match \"CỔNG PHÁP LUẬT QUỐC GIA\"\\){ Write-Output \"CONTENT OK: tìm thấy tiêu đề trang\" } else { Write-Output \"CONTENT: không thấy tiêu đề \\(xem đoạn đầu\\)\"; $r.Content.Substring\\(0,400\\) } } catch { Write-Output \"ERROR: $\\($_.Exception.Message\\)\" })",
+      "PowerShell($machine = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\); $user = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); $env:Path = \"$machine;$user\"; npm run build)",
+      "PowerShell($ok=$false; for\\($i=0;$i -lt 20;$i++\\){ try{ $r=Invoke-WebRequest -Uri \"http://localhost:3000/tam-nhin\" -UseBasicParsing -TimeoutSec 5; Write-Output \"STATUS $\\($r.StatusCode\\) tren cong 3000\"; $ok=$true; break }catch{ Start-Sleep -Seconds 2 } }; if\\(-not $ok\\){ Write-Output \"Chua san sang\" })",
+      "PowerShell(git config --global user.name \"nhanhl\"; git config --global user.email \"hoangluongnhan@gmail.com\"; Write-Output \"--- Xac nhan ---\"; Write-Output \"user.name  = $\\(git config --global user.name\\)\"; Write-Output \"user.email = $\\(git config --global user.email\\)\")",
+      "Bash(command -v git)",
+      "Bash(git --version)",
+      "Bash(git config *)",
+      "Bash(echo \"user.name  = $\\(git config --global user.name\\)\")",
+      "Bash(echo \"user.email = $\\(git config --global user.email\\)\")"
     ]
   }
 }

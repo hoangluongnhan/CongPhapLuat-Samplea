@@ -10,15 +10,28 @@ import {
   feedbackStatusLabel,
   formatDate,
 } from "@/lib/format";
-import type { DraftStatus } from "@/lib/types";
+import { genId } from "@/lib/storage";
+import type {
+  DraftStatus,
+  OpenLetterContent,
+  StrategicDirection,
+  VisionContent,
+} from "@/lib/types";
 
-type Tab = "tong-quan" | "tin-tuc" | "du-thao" | "phan-anh" | "he-thong";
+type Tab =
+  | "tong-quan"
+  | "tin-tuc"
+  | "du-thao"
+  | "phan-anh"
+  | "noi-dung"
+  | "he-thong";
 
 const tabs: { key: Tab; label: string }[] = [
   { key: "tong-quan", label: "Tổng quan" },
   { key: "tin-tuc", label: "Tin tức" },
   { key: "du-thao", label: "Dự thảo" },
   { key: "phan-anh", label: "Phản ánh" },
+  { key: "noi-dung", label: "Nội dung (CMS)" },
   { key: "he-thong", label: "Hệ thống" },
 ];
 
@@ -71,6 +84,7 @@ export default function AdminPage() {
         {tab === "tin-tuc" && <NewsAdmin />}
         {tab === "du-thao" && <DraftAdmin />}
         {tab === "phan-anh" && <FeedbackAdmin />}
+        {tab === "noi-dung" && <ContentAdmin />}
         {tab === "he-thong" && <SystemAdmin />}
       </div>
     </>
@@ -322,6 +336,208 @@ function FeedbackAdmin() {
         </table>
       </div>
     </div>
+  );
+}
+
+function ContentAdmin() {
+  const [sub, setSub] = useState<"tam-nhin" | "thu-ngo">("tam-nhin");
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <button
+          onClick={() => setSub("tam-nhin")}
+          className={cx(
+            "rounded-lg px-3 py-1.5 text-sm font-medium",
+            sub === "tam-nhin" ? "bg-primary-100 text-primary-700" : "bg-white text-slate-600"
+          )}
+        >
+          Tầm nhìn & định hướng
+        </button>
+        <button
+          onClick={() => setSub("thu-ngo")}
+          className={cx(
+            "rounded-lg px-3 py-1.5 text-sm font-medium",
+            sub === "thu-ngo" ? "bg-primary-100 text-primary-700" : "bg-white text-slate-600"
+          )}
+        >
+          Thư ngỏ
+        </button>
+      </div>
+      {sub === "tam-nhin" ? <VisionEditor /> : <OpenLetterEditor />}
+    </div>
+  );
+}
+
+function VisionEditor() {
+  const { db, updateVision } = useApp();
+  const [form, setForm] = useState<VisionContent>(db.siteContent.vision);
+  const [saved, setSaved] = useState(false);
+
+  const set = <K extends keyof VisionContent>(k: K, v: VisionContent[K]) => {
+    setForm((f) => ({ ...f, [k]: v }));
+    setSaved(false);
+  };
+
+  const setDir = (id: string, patch: Partial<StrategicDirection>) =>
+    set(
+      "directions",
+      form.directions.map((d) => (d.id === id ? { ...d, ...patch } : d))
+    );
+
+  const addDir = () =>
+    set("directions", [
+      ...form.directions,
+      { id: genId("dir"), title: "", description: "", icon: "📌" },
+    ]);
+
+  const removeDir = (id: string) =>
+    set("directions", form.directions.filter((d) => d.id !== id));
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        updateVision(form);
+        setSaved(true);
+      }}
+      className="card space-y-4 p-5"
+    >
+      {saved && (
+        <div className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
+          Đã lưu nội dung Tầm nhìn.
+        </div>
+      )}
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <label className="label">Tiêu đề Tầm nhìn</label>
+          <input className="input" value={form.title} onChange={(e) => set("title", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">URL hình minh họa (không bắt buộc)</label>
+          <input className="input" value={form.imageUrl ?? ""} onChange={(e) => set("imageUrl", e.target.value)} placeholder="https://..." />
+        </div>
+      </div>
+      <div>
+        <label className="label">Nội dung Tầm nhìn (cách đoạn bằng dòng trống)</label>
+        <textarea rows={4} className="input" value={form.visionText} onChange={(e) => set("visionText", e.target.value)} />
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <label className="label">Tiêu đề Sứ mệnh</label>
+          <input className="input" value={form.missionTitle} onChange={(e) => set("missionTitle", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Tiêu đề khu vực Định hướng</label>
+          <input className="input" value={form.directionsTitle} onChange={(e) => set("directionsTitle", e.target.value)} />
+        </div>
+      </div>
+      <div>
+        <label className="label">Nội dung Sứ mệnh</label>
+        <textarea rows={3} className="input" value={form.missionText} onChange={(e) => set("missionText", e.target.value)} />
+      </div>
+
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <label className="label mb-0">Danh sách định hướng</label>
+          <button type="button" onClick={addDir} className="btn-outline text-sm">
+            + Thêm định hướng
+          </button>
+        </div>
+        <div className="space-y-3">
+          {form.directions.map((d, i) => (
+            <div key={d.id} className="rounded-lg border border-slate-200 p-3">
+              <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
+                <span>Định hướng {i + 1}</span>
+                <button type="button" onClick={() => removeDir(d.id)} className="text-rose-600 hover:underline">
+                  Xóa
+                </button>
+              </div>
+              <div className="grid gap-2 md:grid-cols-[5rem_1fr]">
+                <input className="input" value={d.icon} onChange={(e) => setDir(d.id, { icon: e.target.value })} placeholder="Icon" />
+                <input className="input" value={d.title} onChange={(e) => setDir(d.id, { title: e.target.value })} placeholder="Tiêu đề" />
+              </div>
+              <textarea className="input mt-2" rows={2} value={d.description} onChange={(e) => setDir(d.id, { description: e.target.value })} placeholder="Mô tả" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <button type="submit" className="btn-primary">Lưu nội dung Tầm nhìn</button>
+    </form>
+  );
+}
+
+function OpenLetterEditor() {
+  const { db, updateOpenLetter } = useApp();
+  const [form, setForm] = useState<OpenLetterContent>(db.siteContent.openLetter);
+  const [saved, setSaved] = useState(false);
+
+  const set = <K extends keyof OpenLetterContent>(
+    k: K,
+    v: OpenLetterContent[K]
+  ) => {
+    setForm((f) => ({ ...f, [k]: v }));
+    setSaved(false);
+  };
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        updateOpenLetter(form);
+        setSaved(true);
+      }}
+      className="card space-y-4 p-5"
+    >
+      {saved && (
+        <div className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
+          Đã lưu nội dung Thư ngỏ.
+        </div>
+      )}
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <label className="label">Tiêu đề trang</label>
+          <input className="input" value={form.title} onChange={(e) => set("title", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Địa điểm và ngày</label>
+          <input className="input" value={form.location} onChange={(e) => set("location", e.target.value)} />
+        </div>
+      </div>
+      <div>
+        <label className="label">Kính gửi</label>
+        <input className="input" value={form.recipient} onChange={(e) => set("recipient", e.target.value)} />
+      </div>
+      <div>
+        <label className="label">Nội dung thư (cách đoạn bằng dòng trống)</label>
+        <textarea rows={6} className="input" value={form.body} onChange={(e) => set("body", e.target.value)} />
+      </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        <div>
+          <label className="label">Lời kết</label>
+          <input className="input" value={form.closing} onChange={(e) => set("closing", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Chức danh</label>
+          <input className="input" value={form.signerTitle} onChange={(e) => set("signerTitle", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Họ tên lãnh đạo</label>
+          <input className="input" value={form.signerName} onChange={(e) => set("signerName", e.target.value)} />
+        </div>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <label className="label">URL ảnh chân dung (không bắt buộc)</label>
+          <input className="input" value={form.portraitUrl ?? ""} onChange={(e) => set("portraitUrl", e.target.value)} placeholder="https://..." />
+        </div>
+        <div>
+          <label className="label">URL ảnh chữ ký (không bắt buộc)</label>
+          <input className="input" value={form.signatureUrl ?? ""} onChange={(e) => set("signatureUrl", e.target.value)} placeholder="https://..." />
+        </div>
+      </div>
+      <button type="submit" className="btn-primary">Lưu nội dung Thư ngỏ</button>
+    </form>
   );
 }
 
