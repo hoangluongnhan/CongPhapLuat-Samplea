@@ -21,6 +21,7 @@ const navItems: NavItem[] = [
       { href: "/gioi-thieu", label: "Giới thiệu chung" },
       { href: "/tam-nhin", label: "Tầm nhìn & định hướng" },
       { href: "/thu-ngo", label: "Thư ngỏ" },
+      { href: "/can-bo", label: "Danh sách cán bộ" },
     ],
   },
   { href: "/tin-tuc", label: "Tin tức" },

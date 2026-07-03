@@ -14,6 +14,7 @@ import { genId } from "@/lib/storage";
 import type {
   DraftStatus,
   OpenLetterContent,
+  StaffMember,
   StrategicDirection,
   VisionContent,
 } from "@/lib/types";
@@ -340,31 +341,123 @@ function FeedbackAdmin() {
 }
 
 function ContentAdmin() {
-  const [sub, setSub] = useState<"tam-nhin" | "thu-ngo">("tam-nhin");
+  const [sub, setSub] = useState<"tam-nhin" | "thu-ngo" | "can-bo">("tam-nhin");
+  const subTabs: { key: typeof sub; label: string }[] = [
+    { key: "tam-nhin", label: "Tầm nhìn & định hướng" },
+    { key: "thu-ngo", label: "Thư ngỏ" },
+    { key: "can-bo", label: "Danh sách cán bộ" },
+  ];
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <button
-          onClick={() => setSub("tam-nhin")}
-          className={cx(
-            "rounded-lg px-3 py-1.5 text-sm font-medium",
-            sub === "tam-nhin" ? "bg-primary-100 text-primary-700" : "bg-white text-slate-600"
-          )}
-        >
-          Tầm nhìn & định hướng
-        </button>
-        <button
-          onClick={() => setSub("thu-ngo")}
-          className={cx(
-            "rounded-lg px-3 py-1.5 text-sm font-medium",
-            sub === "thu-ngo" ? "bg-primary-100 text-primary-700" : "bg-white text-slate-600"
-          )}
-        >
-          Thư ngỏ
+      <div className="flex flex-wrap gap-2">
+        {subTabs.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setSub(t.key)}
+            className={cx(
+              "rounded-lg px-3 py-1.5 text-sm font-medium",
+              sub === t.key
+                ? "bg-primary-100 text-primary-700"
+                : "bg-white text-slate-600"
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {sub === "tam-nhin" && <VisionEditor />}
+      {sub === "thu-ngo" && <OpenLetterEditor />}
+      {sub === "can-bo" && <StaffEditor />}
+    </div>
+  );
+}
+
+function StaffEditor() {
+  const { db, updateStaff } = useApp();
+  const [list, setList] = useState<StaffMember[]>(db.siteContent.staff);
+  const [saved, setSaved] = useState(false);
+
+  const change = () => setSaved(false);
+
+  const setMember = (id: string, patch: Partial<StaffMember>) => {
+    setList((l) => l.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+    change();
+  };
+
+  const addMember = () => {
+    setList((l) => [
+      ...l,
+      {
+        id: genId("st"),
+        fullName: "",
+        position: "",
+        department: "",
+        email: "",
+        phone: "",
+        photoUrl: "",
+      },
+    ]);
+    change();
+  };
+
+  const removeMember = (id: string) => {
+    setList((l) => l.filter((m) => m.id !== id));
+    change();
+  };
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        updateStaff(list);
+        setSaved(true);
+      }}
+      className="card space-y-4 p-5"
+    >
+      {saved && (
+        <div className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
+          Đã lưu danh sách cán bộ.
+        </div>
+      )}
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-slate-800">
+          Cán bộ ({list.length})
+        </h3>
+        <button type="button" onClick={addMember} className="btn-outline text-sm">
+          + Thêm cán bộ
         </button>
       </div>
-      {sub === "tam-nhin" ? <VisionEditor /> : <OpenLetterEditor />}
-    </div>
+
+      <div className="space-y-3">
+        {list.map((m, i) => (
+          <div key={m.id} className="rounded-lg border border-slate-200 p-3">
+            <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
+              <span>Cán bộ {i + 1}</span>
+              <button
+                type="button"
+                onClick={() => removeMember(m.id)}
+                className="text-rose-600 hover:underline"
+              >
+                Xóa
+              </button>
+            </div>
+            <div className="grid gap-2 md:grid-cols-2">
+              <input className="input" placeholder="Họ và tên" value={m.fullName} onChange={(e) => setMember(m.id, { fullName: e.target.value })} />
+              <input className="input" placeholder="Chức vụ" value={m.position} onChange={(e) => setMember(m.id, { position: e.target.value })} />
+              <input className="input md:col-span-2" placeholder="Đơn vị / phòng ban" value={m.department} onChange={(e) => setMember(m.id, { department: e.target.value })} />
+              <input className="input" placeholder="Email" value={m.email ?? ""} onChange={(e) => setMember(m.id, { email: e.target.value })} />
+              <input className="input" placeholder="Điện thoại" value={m.phone ?? ""} onChange={(e) => setMember(m.id, { phone: e.target.value })} />
+              <input className="input md:col-span-2" placeholder="URL ảnh chân dung (không bắt buộc)" value={m.photoUrl ?? ""} onChange={(e) => setMember(m.id, { photoUrl: e.target.value })} />
+            </div>
+          </div>
+        ))}
+        {list.length === 0 && (
+          <p className="text-sm text-slate-400">Chưa có cán bộ nào.</p>
+        )}
+      </div>
+
+      <button type="submit" className="btn-primary">Lưu danh sách cán bộ</button>
+    </form>
   );
 }
 

@@ -27,6 +27,7 @@ import type {
   LegalDocument,
   NewsArticle,
   OpenLetterContent,
+  StaffMember,
   User,
   UserRole,
   VisionContent,
@@ -82,6 +83,7 @@ interface AppContextValue {
   // Nội dung tĩnh (CMS)
   updateVision: (vision: VisionContent) => void;
   updateOpenLetter: (letter: OpenLetterContent) => void;
+  updateStaff: (staff: StaffMember[]) => void;
 
   resetData: () => void;
 }
@@ -381,6 +383,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [db, persist]
   );
 
+  const updateStaff = useCallback<AppContextValue["updateStaff"]>(
+    (staff) => {
+      persist({ ...db, siteContent: { ...db.siteContent, staff } });
+    },
+    [db, persist]
+  );
+
   const resetData = useCallback(() => {
     const fresh = resetDB();
     setDb(fresh);
@@ -408,6 +417,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       answerLegalAid,
       updateVision,
       updateOpenLetter,
+      updateStaff,
       resetData,
     }),
     [
@@ -431,6 +441,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       answerLegalAid,
       updateVision,
       updateOpenLetter,
+      updateStaff,
       resetData,
     ]
   );

@@ -1,4 +1,11 @@
+import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
+
+const subPages = [
+  { href: "/tam-nhin", title: "Tầm nhìn & định hướng", desc: "Chiến lược phát triển dài hạn", icon: "🎯" },
+  { href: "/thu-ngo", title: "Thư ngỏ", desc: "Thư chào mừng từ lãnh đạo", icon: "✉️" },
+  { href: "/can-bo", title: "Danh sách cán bộ", desc: "Đội ngũ vận hành Cổng", icon: "👥" },
+];
 
 const roles = [
   {
@@ -71,6 +78,27 @@ export default function AboutPage() {
                 ))}
               </ul>
             </div>
+          ))}
+        </div>
+
+        <h2 className="mb-5 mt-10 text-xl font-bold text-slate-800">
+          Khám phá thêm
+        </h2>
+        <div className="grid gap-5 md:grid-cols-3">
+          {subPages.map((p) => (
+            <Link
+              key={p.href}
+              href={p.href}
+              className="card flex items-center gap-4 p-5 transition hover:shadow-md"
+            >
+              <span className="text-3xl">{p.icon}</span>
+              <span>
+                <span className="block font-semibold text-slate-800">
+                  {p.title}
+                </span>
+                <span className="block text-sm text-slate-500">{p.desc}</span>
+              </span>
+            </Link>
           ))}
         </div>
 

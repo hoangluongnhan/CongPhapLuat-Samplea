@@ -144,10 +144,22 @@ export interface OpenLetterContent {
   signatureUrl?: string; // Ảnh chữ ký (không bắt buộc)
 }
 
+/** Một cán bộ trong danh sách nhân sự (mục Giới thiệu) */
+export interface StaffMember {
+  id: string;
+  fullName: string;
+  position: string; // Chức vụ
+  department: string; // Đơn vị / phòng ban
+  email?: string;
+  phone?: string;
+  photoUrl?: string; // Ảnh chân dung (không bắt buộc)
+}
+
 /** Nội dung tĩnh do quản trị viên biên soạn (mô phỏng CMS) */
 export interface SiteContent {
   vision: VisionContent;
   openLetter: OpenLetterContent;
+  staff: StaffMember[];
 }
 
 /** Cấu trúc toàn bộ dữ liệu lưu trong localStorage */
